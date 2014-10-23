@@ -39,7 +39,20 @@ if( !(isset( $_POST['checkRegister'] ) ) ) { ?>
 		            <label for="password">Password</label>
 		            <input name="password" id="password" type="password" placeholder="***********" required>
 		        </div>
-		
+		        
+		        <div class="pure-control-group">
+		            <label for="confirm_password">Confirm Password</label>
+		            <input name="confirm_password" id="confirm_password" type="password" placeholder="***********" required>
+		        </div>
+		       
+		       <div class="pure-control-group">
+				<label for="status">Your Status</label>
+		        <select id="state" name="status" size="1">
+				<option value="0">Client</option>
+				<option value="1">Employee</option>
+			    </select>
+		        </div> 
+		        
 		        <div class="pure-controls">
 		            <button id="SignInButton" type="submit" name="checkRegister" class="pure-button pure-button-primary">Finish Registration</button>
 		        </div>
@@ -66,7 +79,8 @@ if( !(isset( $_POST['checkRegister'] ) ) ) { ?>
 	$user = new User();
 	echo "<br />[DEBUG] Email: ". $_POST['email'];
 	echo "<br />[DEBUG] Password: " . $_POST['password'];
-	
+	echo "<br />[DEBUG] Status: " . $_POST['status'];
+		
 	if( $user->register( $_POST ) ) {
 		echo "<br />Registration Successful. Go to <a href='login.php'>Sign in</a>.";
 	} else {

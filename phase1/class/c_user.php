@@ -1,16 +1,38 @@
 <?php
 include_once(__DIR__.'/../include/conf.php');
 include_once(__DIR__.'/../include/helper.php');
+include_once(__DIR__.'/../include/crypt.php'); 
 include_once(__DIR__.'/../include/TransferException.php');
 
 class User {
 	public $email = null;
 	public $password = null;
-	public $salt = null;
 	public $id = null;
 	public $isEmployee = null;
 	public $isActive = null;
 	
+	
+	public function checkPassword($passwd,$confirm_passwd){
+		
+		
+		$uppercase = preg_match('@[A-Z]@', $passwd);
+		$lowercase = preg_match('@[a-z]@', $passwd);
+		$number    = preg_match('@[0-9]@', $passwd);
+
+		
+		//TODO display rules for password
+		 if(!$uppercase || !$lowercase || !$number || strlen($passwd) < 8) {
+		//	echo " password not secure ";
+			return false;
+		}
+		#compare passwords
+		else if($passwd!=$confirm_passwd){
+		//	echo "You entered different passwords";
+			return false;
+		}
+		
+		return true;
+	}
 	
 	
 	public function getAccountNumberID( $accountNumber ) {
@@ -118,6 +140,8 @@ class User {
 			$stmt->execute();
 			
 			if ( $stmt->rowCount() >= 100 ) {
+				
+				//TODO send mail
 				return true;
 			} else {
 				return false;
@@ -147,7 +171,7 @@ class User {
 			
 			if ( $stmt->rowCount() > 0 ) {
 				if ( $this->updateNextTan( $source ) ) {
-					$sql = "INSERT INTO transactions (source, destination, amount, code, is_approved) VALUES (:source, :destination, :amount, :code, :is_approved)";
+					$sql = "INSERT INTO transactions (source, destination, amount, code, is_approved, date_time) VALUES (:source, :destination, :amount, :code, :is_approved, NOW())";
 					$stmt = $connection->prepare( $sql );
 					$stmt->bindValue( "source", $source, PDO::PARAM_STR );
 					$stmt->bindValue( "destination", $destination, PDO::PARAM_STR );
@@ -288,20 +312,38 @@ class User {
 	public function register( $data = array() ) {
 		if( isset( $data['email'] ) ) $this->email = stripslashes( strip_tags( $data['email'] ) );
 		else return false;
+		
+		if(checkUserExists($this->email)){
+			return false;
+		}
+		
 		if( isset( $data['password'] ) ) $this->password = stripslashes( strip_tags( $data['password'] ) );
 		else return false;
+		if( isset( $data['confirm_password'] ) ) $confirm_password = stripslashes( strip_tags( $data['confirm_password'] ) );
+		else return false;
+		if( isset( $data['status'] ) ) $status = stripslashes( strip_tags( $data['status'] ) );
+		else return false;
+		
+		if ($data['status'] == 1){
+			$this->isEmployee = true;
+		} else {
+			$this->isEmployee = false;
+		}
+		
+		if (!$this->checkPassword($this->password,$confirm_password)){
+		 return false;
+		}
 		
 		try{
 			$connection = new PDO( DB_NAME, DB_USER, DB_PASS );
 			$connection->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
 	 
-			$sql = "INSERT INTO users (email,passwd,salt,is_employee,is_active) VALUES (:email,:password,:salt,:isEmployee,:isActive)";
+			$sql = "INSERT INTO users (email,passwd,is_employee,is_active) VALUES (:email,:password,:isEmployee,:isActive)";
 			$stmt = $connection->prepare( $sql );
 			$stmt->bindValue( "email", $this->email, PDO::PARAM_STR );
-			$stmt->bindValue( "password", $this->password, PDO::PARAM_STR );
-			$stmt->bindValue( "salt", 'salt', PDO::PARAM_STR );
-			$stmt->bindValue( "isEmployee", false, PDO::PARAM_STR );
-			$stmt->bindValue( "isActive", true, PDO::PARAM_STR );
+			$stmt->bindValue( "password", generateSaltedHash($this->password), PDO::PARAM_STR );
+			$stmt->bindValue( "isEmployee", $this->isEmployee, PDO::PARAM_STR );
+			$stmt->bindValue( "isActive", false, PDO::PARAM_STR );
 			$stmt->execute();
 				
 			$connection = null;
@@ -431,7 +473,6 @@ class User {
 			
 			$this->email = $result['email'];
 			$this->password = $result['passwd'];
-			$this->salt = $result['salt'];
 			$this->isEmployee = $result['is_employee'];
 			$this->isActive = $result['is_active'];
 			$this->id = $result['id'];
@@ -455,15 +496,25 @@ class User {
 		
 		try{
 			$connection = new PDO( DB_NAME, DB_USER, DB_PASS );
-			$sql = "SELECT * FROM users WHERE email = :email AND passwd = :password LIMIT 1";
+			$sql = "SELECT passwd, BIN(`is_active` + 0) AS `is_active` FROM users WHERE email = :email LIMIT 1";
 				
 			$stmt = $connection->prepare( $sql );
 			$stmt->bindValue( "email", $this->email, PDO::PARAM_STR );
-			$stmt->bindValue( "password", $this->password, PDO::PARAM_STR );
 			$stmt->execute();
 				
-			if( $stmt->fetchColumn() ) {
-				$success = true;
+			$result = $stmt->fetch();
+			if( $result ) {
+				if($result['is_active'] == 0){
+					//TODO message
+					
+					return false;
+				}
+				
+				
+				 if( crypt($this->password,$result['passwd']) === $result['passwd']){
+				    $success = true;
+				}
+				
 			}
 				
 			$connection = null;

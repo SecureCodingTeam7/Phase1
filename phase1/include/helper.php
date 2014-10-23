@@ -9,6 +9,18 @@ function randomDigits( $length ) {
 	return $digits;
 }
 
+function uploadFile($file) {
+	// $_FILES["uploadFile"]["name"]
+	$target_dir = __DIR__."/../uploads/";
+	$target_dir = $target_dir . "file.txt";
+
+	if (move_uploaded_file($file, $target_dir)) {
+		echo "The file has been uploaded.";
+	} else {
+		echo "Sorry, there was an error uploading your file.";
+	}
+}
+
 function generateNewAccountNumber() {
 	$accountNumber = randomDigits(10);
 	
@@ -43,4 +55,31 @@ function checkAccountExists( $accountNumber ) {
 		echo "<br />Connect Error: ". $e->getMessage();
 	}
 }
+
+
+function checkUserExists( $email ) {
+	try {
+		$connection = new PDO( DB_NAME, DB_USER, DB_PASS );
+		$connection->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
+		
+		// Obtain user_id associated with given account
+		$sql = "SELECT * FROM users WHERE email = :email";
+		$stmt = $connection->prepare( $sql );
+		$stmt->bindValue( "email", $email, PDO::PARAM_STR );
+		$stmt->execute();
+		
+		$result = $stmt->fetch();
+		
+		// Make sure Source Account belongs to this user
+		if ( $stmt->rowCount() > 0 ) {
+			return true;
+		} else {
+			return false;
+		}
+	} catch (PDOException $e) {
+		echo "<br />Connect Error: ". $e->getMessage();
+	}
+}
+
+
 ?>

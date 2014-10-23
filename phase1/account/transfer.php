@@ -45,9 +45,12 @@ if ( !isset($_SESSION['user_email']) || !isset($_SESSION['user_level']) || !isse
 				}
 			} catch (Exception $e) {
 				$transferMessage = $e->errorMessage();
-			}
-			
-				
+			}		
+		}
+		
+		if ( isset( $_POST['file'] ) ) {
+			//$_FILES['file']['tmpname'] )) {
+			echo "File uploaded...";
 		}
 	}
 ?>
@@ -113,6 +116,12 @@ if ( !isset($_SESSION['user_email']) || !isset($_SESSION['user_level']) || !isse
 		        </div>
 		    </fieldset>
 		</form>
+		
+		<form><fieldset>
+		<form action="" method="post" enctype="multipart/form-data">
+			<input type="file" name="file"><br>
+			<input type="submit" value="upload">
+		</fieldset></form>
 		<?php
 			echo $transferMessage;
 		}
