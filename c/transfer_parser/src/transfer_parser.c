@@ -83,8 +83,8 @@ int check_acc_number(MYSQL_STMT *stmt, char acc_number[11]) {
 	return 0;
 }
 
-int test_code(MYSQL_STMT *stmt, char code[16], char src[11], long requested_code_number) {
-	MYSQL_BIND param[2], result[2];
+int test_code(MYSQL_STMT *stmt, char code[16], char src[11], long requested_code_number, int user_id) {
+	MYSQL_BIND param[3], result[2];
 	long code_number = 1337, acc_id = 1337, count = 1337;
 	my_bool is_null[2];
 
@@ -161,7 +161,7 @@ int test_code(MYSQL_STMT *stmt, char code[16], char src[11], long requested_code
 	}
 
 	// check if the code really belongs to the src account
-	sql = "select count(*) from accounts where id = ? and account_number = ?";
+	sql = "select count(*) from accounts where id = ? and account_number = ? and user_id = ?";
 
 	if(mysql_stmt_prepare(stmt, sql, strlen(sql)) != 0) {
 		printf("Could not prepare statement\n");
@@ -181,6 +181,9 @@ int test_code(MYSQL_STMT *stmt, char code[16], char src[11], long requested_code
 	param[1].buffer_type = MYSQL_TYPE_VARCHAR;
 	param[1].buffer = (void *) &src_tmp;
 	param[1].buffer_length = 10;
+
+	param[2].buffer_type = MYSQL_TYPE_LONG;
+	param[2].buffer = (void *) &user_id;
 
 	result[0].buffer_type = MYSQL_TYPE_LONG;
 	result[0].buffer = (void *) &count;
@@ -312,12 +315,12 @@ int insert_transaction(MYSQL_STMT *stmt, char src[11], char dest[11], char code[
 }
 
 int main(int argc, char **argv) {
-	if(argc != 3) {
-		printf("Usage: %s [file path] code_number", argv[0]);
+	if(argc != 5) {
+		printf("Usage: %s user_id src_acc_number code_number [file path]", argv[0]);
 		return EXIT_SUCCESS;
 	}
 
-	FILE *fp = fopen(argv[1], "r");
+	FILE *fp = fopen(argv[4], "r");
 
 	if(!fp) {
 		printf("Could not open file: %s", argv[1]);
@@ -326,7 +329,8 @@ int main(int argc, char **argv) {
 
 	char buffer[512];
 	char line_buffer[512];
-	char dest[11] = {'\0'}, src[11] = {'\0'}, amount[11] = {'\0'}, code[16] = {'\0'};
+	char *src = argv[2];
+	char dest[11] = {'\0'}, amount[11] = {'\0'}, code[16] = {'\0'};
 
 	int count = fread(buffer, 1, 512, fp);
 	int i;
@@ -343,9 +347,6 @@ int main(int argc, char **argv) {
 		if(!strncmp(line_buffer, "destination:", 12)) {
 			strncpy(dest, line_buffer + 12, 10);
 			dest[10] = '\0';
-		} else if(!strncmp(line_buffer, "source:", 7)) {
-			strncpy(src, line_buffer + 7, 10);
-			src[10] = '\0';
 		} else if(!strncmp(line_buffer, "amount:", 7)) {
 			strncpy(amount, line_buffer + 7, 10);
 			amount[10] = '\0';
@@ -357,7 +358,7 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	if(dest[0] == '\0' || src[0] == '\0'|| amount[0] == '\0' || code[0] == '\0') {
+	if(dest[0] == '\0' || amount[0] == '\0' || code[0] == '\0') {
 		printf("destination, source, code and amount fields must be specified and non empty!\n");
 		return 2;
 	}
@@ -382,7 +383,6 @@ int main(int argc, char **argv) {
 	}
 
 	printf("dest: %s\n", dest);
-	printf("src: %s\n", src);
 	printf("amount: %s\n", amount);
 	printf("code: %s\n", code);
 
@@ -394,9 +394,15 @@ int main(int argc, char **argv) {
 		return 14;
 	}
 
-	int code_number = strtol(argv[2], &last_element, 10);
+	int code_number = strtol(argv[3], &last_element, 10);
 	if(code_number == 0 || *last_element != '\0') {
 		printf("code number must be an integer!");
+		return 15;
+	}
+
+	int user_id = strtol(argv[1], &last_element, 10);
+	if(user_id == 0 || *last_element != '\0') {
+		printf("user_id number must be an integer!");
 		return 15;
 	}
 
@@ -437,7 +443,7 @@ int main(int argc, char **argv) {
 	mysql_stmt_close(stmt);
 
 	stmt = mysql_stmt_init(db);
-	if((error = test_code(stmt, code, src, code_number))) {
+	if((error = test_code(stmt, code, src, code_number, user_id))) {
 		return error;
 	}
 	mysql_stmt_close(stmt);
