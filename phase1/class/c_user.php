@@ -524,5 +524,47 @@ class User {
 			return $success;
 		}
 	}
+	
+	public function getInApprovedUsers() {
+		if(!$this->isEmployee) return array();
+		
+		$result = array ();
+		try{
+			$connection = new PDO( DB_NAME, DB_USER, DB_PASS );
+			$sql = "SELECT email,  BIN(`is_employee` + 0) AS `is_employee` FROM users WHERE is_active = 0";
+		
+			$stmt = $connection->prepare( $sql );
+			$stmt->execute();
+		
+			$result = $stmt->fetchAll();
+			// var_dump($result);
+			$connection = null;
+			return $result;
+		} catch ( PDOException $e ) {
+			echo "<br />Connect Error: ". $e->getMessage();
+			return array();
+		}
+	}
+	
+	public function getInApprovedTransactions() {
+		if(!$this->isEmployee) return array();
+		
+		$result = array ();
+		try{
+			$connection = new PDO( DB_NAME, DB_USER, DB_PASS );
+			$sql = "SELECT source, destination, amount, date_time FROM transactions WHERE is_approved = 0";
+		
+			$stmt = $connection->prepare( $sql );
+			$stmt->execute();
+		
+			$result = $stmt->fetchAll();
+			// var_dump($result);
+			$connection = null;
+			return $result;
+		} catch ( PDOException $e ) {
+			echo "<br />Connect Error: ". $e->getMessage();
+			return array();
+		}
+	}
 }
 ?>
