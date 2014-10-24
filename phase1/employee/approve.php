@@ -22,11 +22,24 @@ if ( !isset($_SESSION['user_email']) || !isset($_SESSION['user_level']) || !isse
 	/* Session Valid */
 	$user = new User();
 	$user->getUserDataFromEmail( $_SESSION['user_email'] );
+	
+	$submitSucces = false;
+	
+	if(isset($_POST['transactions'])) {
+		$submitSucces = true;
+		$user->approveTransactions($_POST['transactions']);
+	}
+	
+	if(isset($_POST['users'])) {
+		$submitSucces = true;
+		$user->approveUsers($_POST['users']);
+	}
+	
 ?>
 <!doctype html>
 <html>
 <head>
-	<title>Phase1: Employee panel</title>
+	<title>Phase1: Employee Panel</title>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<link href="../style/style.css" type="text/css" rel="stylesheet" />
 	<link href="../style/pure.css" type="text/css" rel="stylesheet" />
@@ -39,14 +52,19 @@ if ( !isset($_SESSION['user_email']) || !isset($_SESSION['user_level']) || !isse
 				<div class="userpanel">
 					<?php echo $_SESSION['user_email'] ?>
 					<a href="logout.php">Logout</a><br />
-					Employee panel
+					Employee Panel
 				</div>
 			</div>
 		</div>
 		
 		<div class="main">
+		<form method="post">
 		<?php 
-			echo "Currently inapproved transactions:";
+			if($submitSucces) {
+				echo "Approval was successful!";
+				echo "<br>";
+			}
+			echo "Currently Inapproved Transactions";
 			
 			$transactions = $user->getInApprovedTransactions();
 			$odd = true;
@@ -74,7 +92,7 @@ if ( !isset($_SESSION['user_email']) || !isset($_SESSION['user_level']) || !isse
 						echo "<tr>";
 						$odd = true; 
 					}?>
-			            <td><?php echo ++$count; ?></td>
+			            <td><?php echo "<input type=\"checkbox\" name=\"transactions[]\" value=\"".$transaction['id']."\">" ?></td>
 			            <td><?php echo $transaction['source']; ?></td>
 			            <td><?php echo $transaction['destination']; ?></td>
 			            <td><?php echo $transaction['amount']; ?></td>
@@ -86,9 +104,10 @@ if ( !isset($_SESSION['user_email']) || !isset($_SESSION['user_level']) || !isse
 
 			    </tbody>
 			</table>
+			<br>
 			
 		<?php 
-			echo "Currently inapproved users:";
+			echo "Currently Inapproved Users";
 			
 			$users = $user->getInApprovedUsers();
 			$odd = true;
@@ -114,7 +133,7 @@ if ( !isset($_SESSION['user_email']) || !isset($_SESSION['user_level']) || !isse
 						echo "<tr>";
 						$odd = true; 
 					}?>
-			            <td><?php echo ++$count; ?></td>
+			            <td><?php echo "<input type=\"checkbox\" name=\"users[]\" value=\"".$user['id']."\">" ?></td>
 			            <td><?php echo $user['email']; ?></td>
 			            <td><?php if ($user['is_employee'] > 0) echo "yes"; else echo "no"; ?></td>
 			        </tr>
@@ -125,6 +144,11 @@ if ( !isset($_SESSION['user_email']) || !isset($_SESSION['user_level']) || !isse
 			    </tbody>
 			</table>
 
+		<br>
+		<div class="pure-controls">
+            <button id="approveButton" type="submit" name="approve" class="pure-button pure-button-primary">Approve</button>
+		</div>
+		</form>
 		</div>
 		</div>
 	</div>

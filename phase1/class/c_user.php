@@ -531,7 +531,7 @@ class User {
 		$result = array ();
 		try{
 			$connection = new PDO( DB_NAME, DB_USER, DB_PASS );
-			$sql = "SELECT email,  BIN(`is_employee` + 0) AS `is_employee` FROM users WHERE is_active = 0";
+			$sql = "SELECT id, email,  BIN(`is_employee` + 0) AS `is_employee` FROM users WHERE is_active = 0";
 		
 			$stmt = $connection->prepare( $sql );
 			$stmt->execute();
@@ -552,7 +552,7 @@ class User {
 		$result = array ();
 		try{
 			$connection = new PDO( DB_NAME, DB_USER, DB_PASS );
-			$sql = "SELECT source, destination, amount, date_time FROM transactions WHERE is_approved = 0";
+			$sql = "SELECT id, source, destination, amount, date_time FROM transactions WHERE is_approved = 0";
 		
 			$stmt = $connection->prepare( $sql );
 			$stmt->execute();
@@ -561,6 +561,46 @@ class User {
 			// var_dump($result);
 			$connection = null;
 			return $result;
+		} catch ( PDOException $e ) {
+			echo "<br />Connect Error: ". $e->getMessage();
+			return array();
+		}
+	}
+	
+	public function approveUsers($userIds) {
+		if(!$this->isEmployee) return;
+		try {
+			$connection = new PDO( DB_NAME, DB_USER, DB_PASS );
+			
+			foreach($userIds as $userId) {
+				$sql = "UPDATE users set is_active = 1 WHERE id = :id";
+			
+				$stmt = $connection->prepare( $sql );
+				$stmt->bindValue( "id", $userId, PDO::PARAM_INT );
+				$stmt->execute();
+			}
+			
+			$connection = null;
+		} catch ( PDOException $e ) {
+			echo "<br />Connect Error: ". $e->getMessage();
+			return array();
+		}
+	}
+	
+	public function approveTransactions($tansactionIds) {
+		if(!$this->isEmployee) return;
+		try {
+			$connection = new PDO( DB_NAME, DB_USER, DB_PASS );
+		
+			foreach($tansactionIds as $tansactionId) {
+				$sql = "UPDATE transactions set is_approved = 1 WHERE id = :id";
+			
+				$stmt = $connection->prepare( $sql );
+				$stmt->bindValue( "id", $tansactionId, PDO::PARAM_INT );
+				$stmt->execute();
+			}
+			
+			$connection = null;
 		} catch ( PDOException $e ) {
 			echo "<br />Connect Error: ". $e->getMessage();
 			return array();
