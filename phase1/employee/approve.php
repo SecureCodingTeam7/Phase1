@@ -18,6 +18,8 @@ if ( !isset($_SESSION['user_email']) || !isset($_SESSION['user_level']) || !isse
 	
 	/* Session Data Invalid -> Redirect to Login */
 	//header($loginRedirectHeader);
+} else if(!$_SESSION['user_level']) {
+	echo "Access denied!";
 } else {
 	/* Session Valid */
 	$user = new User();

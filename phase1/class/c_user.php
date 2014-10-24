@@ -463,7 +463,7 @@ class User {
 		$result = array ();
 		try{
 			$connection = new PDO( DB_NAME, DB_USER, DB_PASS );
-			$sql = "SELECT * FROM users WHERE email = :email LIMIT 1";
+			$sql = "SELECT id, email, passwd, BIN(`is_employee` + 0) AS `is_employee`, BIN(`is_active` + 0) AS `is_active` FROM users WHERE email = :email LIMIT 1";
 		
 			$stmt = $connection->prepare( $sql );
 			$stmt->bindValue( "email", $email, PDO::PARAM_STR );
