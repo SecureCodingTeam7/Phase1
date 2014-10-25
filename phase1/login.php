@@ -69,10 +69,9 @@ if( !(isset( $_POST['checkLogin'] ) ) ) { ?>
 	
 	if( $user->checkCredentials( $_POST ) ) {
 		/* Set Session */
-		$user->getUserDataFromEmail($_POST['email']);
 		session_start();
 		$_SESSION['user_email'] = $user->email;
-		$_SESSION['user_level'] = $user->isEmployee;
+		$_SESSION['user_level'] = 1;
 		$_SESSION['user_login'] = 1;
 		
 		echo "<br />Successful Login. <a href='account/index.php'>Click here</a> to continue.";

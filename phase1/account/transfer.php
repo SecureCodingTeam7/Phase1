@@ -19,16 +19,20 @@ if ( !isset($_SESSION['user_email']) || !isset($_SESSION['user_level']) || !isse
 	/* Session Data Invalid -> Redirect to Login */
 	//header($loginRedirectHeader);
 } else {
+	
 	/* Session Valid */
 	$user = new User();
 	$selectedAccount = "none";
 	$transferSuccess = 0;
 	$transferMessage = "";
-	$requiredTAN = -1;
+	
 	$user->getUserDataFromEmail( $_SESSION['user_email'] );
+	$requiredTAN = "-1";
 	
 	if ( isset( $_SESSION['selectedAccount'] ) ) {
 		$selectedAccount = $_SESSION['selectedAccount'];
+		
+		$requiredTAN = $user->getNextTAN( $selectedAccount );
 		
 		if ( isset( $_POST['creditTransfer'] ) ) {
 			//echo $_POST['amount'];
@@ -38,7 +42,7 @@ if ( !isset($_SESSION['user_email']) || !isset($_SESSION['user_level']) || !isse
 			try {
 				if( $user->transferCredits( $_POST, $selectedAccount ) ) {
 					$transferSuccess = 1;
-					$transferMessage = "Successfully transferred " .$_POST['amount']. " Eur to " .$_POST['destination'];
+					$transferMessage = "Successfully transferred " .$_POST['amount']. " Euro to " .$_POST['destination'];
 				} else {
 					$transferSuccess = -1;
 					$transferMessage = "Transfer Failed.";
@@ -48,10 +52,7 @@ if ( !isset($_SESSION['user_email']) || !isset($_SESSION['user_level']) || !isse
 			}		
 		}
 		
-		if ( isset( $_POST['file'] ) ) {
-			//$_FILES['file']['tmpname'] )) {
-			echo "File uploaded...";
-		}
+		
 	}
 ?>
 <!doctype html>
@@ -94,7 +95,8 @@ if ( !isset($_SESSION['user_email']) || !isset($_SESSION['user_level']) || !isse
 			} else {
 				echo "Credit Transfer for Account #".$selectedAccount;
 			?>
-		<form method="post" action="" class="pure-form pure-form-aligned">
+		<form method="post" action="" class="pure-form pure-form-aligned" enctype='multipart/form-data'>
+			
 		    <fieldset>
 		        <div class="pure-control-group">
 		            <label for="destination">Destination</label>
@@ -114,14 +116,18 @@ if ( !isset($_SESSION['user_email']) || !isset($_SESSION['user_level']) || !isse
 		        <div class="pure-controls">
 		            <button type="submit" name="creditTransfer" class="pure-button pure-button-primary">Transfer</button>
 		        </div>
+		        
+			<div class = "pure-controls" > OR </div>
 		    </fieldset>
 		</form>
 		
-		<form><fieldset>
-		<form action="" method="post" enctype="multipart/form-data">
-			<input type="file" name="file"><br>
-			<input type="submit" value="upload">
-		</fieldset></form>
+		<form method="POST" action="upload.php" class="pure-form pure-form-aligned">
+		  <div class="pure-controls">
+		            <button type ="submit" name="upload" class="pure-button pure-button-primary">Upload File</button>
+		        </div>
+		</form>
+		
+		
 		<?php
 			echo $transferMessage;
 		}
