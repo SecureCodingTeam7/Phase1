@@ -3,7 +3,10 @@ include_once(__DIR__.'/../include/conf.php');
 include_once(__DIR__.'/../include/helper.php');
 include_once(__DIR__.'/../include/crypt.php'); 
 include_once(__DIR__.'/../include/TransferException.php');
-include_once(__DIR__.'/../include/IsActiveException.php');
+include_once(__DIR__.'/../include/SendEmailException.php');
+include_once(__DIR__.'/../include/phpmailer/class.smtp.php');
+include_once(__DIR__.'/../include/phpmailer/class.smtp.php');
+require(__DIR__.'/../include/phpmailer/class.phpmailer.php');
 
 class User {
 	public $email = null;
@@ -11,6 +14,7 @@ class User {
 	public $id = null;
 	public $isEmployee = null;
 	public $isActive = null;
+	public $message = null;
 	
 	
 	public function checkPassword($passwd,$confirm_passwd){
@@ -485,7 +489,7 @@ class User {
 		$result = array ();
 		try{
 			$connection = new PDO( DB_NAME, DB_USER, DB_PASS );
-			$sql = "SELECT id, email, passwd, BIN(`is_employee` + 0) AS `is_employee`, BIN(`is_active` + 0) AS `is_active` FROM users WHERE email = :email LIMIT 1";
+			$sql = "SELECT * FROM users WHERE email = :email LIMIT 1";
 		
 			$stmt = $connection->prepare( $sql );
 			$stmt->bindValue( "email", $email, PDO::PARAM_STR );
@@ -527,8 +531,9 @@ class User {
 			$result = $stmt->fetch();
 			if( $result ) {
 				if($result['is_active'] == 0){
-					$connection = null;
-					throw new IsActiveException();
+					//TODO message
+					
+					return false;
 				}
 				
 				
@@ -546,86 +551,32 @@ class User {
 		}
 	}
 	
-	public function getInApprovedUsers() {
-		if(!$this->isEmployee) return array();
-		
-		$result = array ();
-		try{
-			$connection = new PDO( DB_NAME, DB_USER, DB_PASS );
-			$sql = "SELECT id, email,  BIN(`is_employee` + 0) AS `is_employee` FROM users WHERE is_active = 0";
-		
-			$stmt = $connection->prepare( $sql );
-			$stmt->execute();
-		
-			$result = $stmt->fetchAll();
-			// var_dump($result);
-			$connection = null;
-			return $result;
-		} catch ( PDOException $e ) {
-			echo "<br />Connect Error: ". $e->getMessage();
-			return array();
-		}
-	}
 	
-	public function getInApprovedTransactions() {
-		if(!$this->isEmployee) return array();
+	function sendMail($email,$message){
 		
-		$result = array ();
-		try{
-			$connection = new PDO( DB_NAME, DB_USER, DB_PASS );
-			$sql = "SELECT id, source, destination, amount, date_time FROM transactions WHERE is_approved = 0";
-		
-			$stmt = $connection->prepare( $sql );
-			$stmt->execute();
-		
-			$result = $stmt->fetchAll();
-			// var_dump($result);
-			$connection = null;
-			return $result;
-		} catch ( PDOException $e ) {
-			echo "<br />Connect Error: ". $e->getMessage();
-			return array();
-		}
-	}
+			
+		$mail = new PHPMailer();
 	
-	public function approveUsers($userIds) {
-		if(!$this->isEmployee) return;
-		try {
-			$connection = new PDO( DB_NAME, DB_USER, DB_PASS );
-			
-			foreach($userIds as $userId) {
-				$sql = "UPDATE users set is_active = 1 WHERE id = :id";
-			
-				$stmt = $connection->prepare( $sql );
-				$stmt->bindValue( "id", $userId, PDO::PARAM_INT );
-				$stmt->execute();
-			}
-			
-			$connection = null;
-		} catch ( PDOException $e ) {
-			echo "<br />Connect Error: ". $e->getMessage();
-			return array();
-		}
-	}
+		$mail->IsSMTP(); // enable SMTP
+		$mail->SMTPDebug = 0;  // debugging: 1 = errors and messages, 2 = messages only
+		$mail->SMTPAuth = true;  // authentication enabled
+		$mail->SMTPSecure = 'ssl'; // secure transfer enabled REQUIRED for GMail
+		$mail->Host = 'smtp.gmail.com';
+		$mail->Port = 465;
+		$mail->Username = "thoxxer";
+		$mail->Password = "abisasam11";
 	
-	public function approveTransactions($tansactionIds) {
-		if(!$this->isEmployee) return;
-		try {
-			$connection = new PDO( DB_NAME, DB_USER, DB_PASS );
-		
-			foreach($tansactionIds as $tansactionId) {
-				$sql = "UPDATE transactions set is_approved = 1 WHERE id = :id";
+		$mail->From     = "thoxxer@gmail.com";
+		$mail->AddAddress("krex@in.tum.de");
+	
+		$mail->Subject  = "registration confirmation";
+		$mail->Body     = $message;
+		$mail->WordWrap = 50;
+	
+		if(!$mail->Send()) {
 			
-				$stmt = $connection->prepare( $sql );
-				$stmt->bindValue( "id", $tansactionId, PDO::PARAM_INT );
-				$stmt->execute();
-			}
-			
-			$connection = null;
-		} catch ( PDOException $e ) {
-			echo "<br />Connect Error: ". $e->getMessage();
-			return array();
-		}
+			throw new SendEmailException($mail->ErrorInfo);
+		} 
 	}
 }
 ?>

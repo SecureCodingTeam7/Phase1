@@ -123,7 +123,6 @@ class User {
 					return false;
 				}
 				
-				$tans[$codeNumber] = $code; 
 				// Code is unique, insert it into db
 				$sql = "INSERT INTO trans_codes (account_id, code_number, code, is_used) VALUES (:account_id, :code_number, :code, :is_used)";
 				$stmt = $connection->prepare ( $sql );
@@ -135,39 +134,19 @@ class User {
 				$stmt->execute();
 			}
 			
-			
 			// Sanity Check
 			$sql = "SELECT * FROM trans_codes WHERE account_id = :account_id";
 			$stmt = $connection->prepare ( $sql );
 			$stmt->bindValue ( "account_id", $this->id, PDO::PARAM_STR );
 			$stmt->execute();
 			
-			//TODO why is rowCount() =0 ?
-			//~ echo $stmt->rowCount();
-			//~ if ( $stmt->rowCount() >= 100 ) {
+			if ( $stmt->rowCount() >= 100 ) {
 				
-				$codes = "";
-				for($i=0; $i<100;$i++){
-					$codes.= $i.": ".$tans[$i]. "\n";
-				}
-				
-
-				$message= "Dear User ".$this->email.". Here are your transcation codes, \n".$codes;
-				
-				try{
-				$this->sendMail($this->email,$message);
-			}
-			catch (SendEmailException $e){
-				echo "<br/>".$e->errorMessage();	
+				//TODO send mail
+				return true;
+			} else {
 				return false;
 			}
-					
-				return true;
-				
-				
-			//~ } else {
-				//~ return false;
-			//~ }
 		} catch ( PDOException $e ) {
 			echo "<br />Connect Error: ". $e->getMessage();
 			return false;
