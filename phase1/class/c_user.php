@@ -3,6 +3,7 @@ include_once(__DIR__.'/../include/conf.php');
 include_once(__DIR__.'/../include/helper.php');
 include_once(__DIR__.'/../include/crypt.php'); 
 include_once(__DIR__.'/../include/TransferException.php');
+include_once(__DIR__.'/../include/IsActiveException.php');
 
 class User {
 	public $email = null;
@@ -505,9 +506,8 @@ class User {
 			$result = $stmt->fetch();
 			if( $result ) {
 				if($result['is_active'] == 0){
-					//TODO message
-					
-					return false;
+					$connection = null;
+					throw new IsActiveException();
 				}
 				
 				
