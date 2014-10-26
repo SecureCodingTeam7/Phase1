@@ -35,7 +35,7 @@
         $selectedAccount = "none";
         $requiredTAN = -1;
         $uploadMessage = "";
-        
+     
         $user->getUserDataFromEmail( $_SESSION['user_email'] );
         
         if ( isset( $_SESSION['selectedAccount'] ) ) {
@@ -52,10 +52,13 @@
                         if(move_uploaded_file($temp_name, $location.$name)){
                             $uploadMessage = 'uploaded';
                             
-                            $command = "./transfer_parser ".$user->id." ".$selectedAccount." ".$user->getNextTan($selectedAccount)." ".$location.$name;
-                            
-                            if(exec($command)){
-                                $uploadMessage=" Transaction succeed";
+                            $command = "./transfer_parser ".$user->id." ".$selectedAccount." ".$user->getNextTan($selectedAccount)." ".$location.$name." 2>&1";
+                            $result="";
+                            exec($command,$result,$return);
+                            var_dump($result);
+                            echo " return value is: $return)";
+                            if($return == 0 ){
+                                $uploadMessage=" Transaction commited";
                                 $user->updateNextTan( $selectedAccount);
                                 
                                 if(!unlink($location.$name)){
@@ -65,13 +68,14 @@
                                 
                             }
                             else {
-                                $uploadMessage = "Please try again";
+								
+                                $uploadMessage = "Error: ".$result[0];
                             }
                             
                         }
                     }
                 }  else {
-                    $uploadMessage = "Please try again";
+                    $uploadMessage = " Error while uploading File! Please try again";
                 }
             }
         }
@@ -131,10 +135,12 @@
 <div class="pure-controls">
 <button type="submit" name = "uploadFile" class="pure-button pure-button-primary" > Submit</button>
 </div>
+<div class="pure-controls">
+<?php echo $uploadMessage; ?>
+</div>
 </form>
 </fieldset>	
 
-<?php echo $uploadMessage; ?>
 </body>
 
 </html>

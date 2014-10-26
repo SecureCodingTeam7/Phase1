@@ -37,14 +37,12 @@ if( !(isset( $_POST['checkRegister'] ) ) ) { ?>
 		
 		        <div class="pure-control-group">
 		            <label for="password">Password</label>
-		            <input name="password" id="password" type="password" placeholder="***********" onkeyup="check_pw()" required>
-		            <b id=password_info></b>
+		            <input name="password" id="password" type="password" placeholder="***********" required>
 		        </div>
 		        
 		        <div class="pure-control-group">
 		            <label for="confirm_password">Confirm Password</label>
-		            <input name="confirm_password" id="confirm_password" type="password" placeholder="***********" onkeyup="check_confirm_pw()" required>
-		            <b id=confirm_password_info></b>
+		            <input name="confirm_password" id="confirm_password" type="password" placeholder="***********" required>
 		        </div>
 		       
 		       <div class="pure-control-group">
@@ -73,44 +71,6 @@ if( !(isset( $_POST['checkRegister'] ) ) ) { ?>
 		</div>
 	</div>
 </body>
-<script>
-	var pw_info = document.getElementById("password_info")
-	var confirm_pw_info = document.getElementById("confirm_password_info")
-	
-	var pw_field = document.getElementById("password")
-	var confirm_pw_field = document.getElementById("confirm_password")
-	
-	var submit_button = document.getElementById("SignInButton")
-	submit_button.disabled = true
-	
-	function check_pw() {
-		// lets check if the pw is strong enough
-		var pw = pw_field.value
-		var lowercase = pw.search("[A-Z]")
-		var uppercase = pw.search("[a-z]")
-		var number = pw.search("[0-9]")
-		
-		if(lowercase == -1 || uppercase == -1 || number == -1) {
-			pw_info.textContent = "Password must have at least one upper case, one lower case letter and one number"
-			submit_button.disabled = true
-		} else {
-			pw_info.textContent = ""
-			if(confirm_pw.value != "") {
-				submit_button.disabled = false
-			}
-		}
-	}
-	
-	function check_confirm_pw() {
-		if(confirm_pw_field.value != pw_field.value) {
-			confirm_pw_info.textContent = "The two passwords do not match!"
-			submit_button.disabled = true
-		} else {
-			confirm_pw_info.textContent = ""
-			submit_button.disabled = false
-		}
-	}
-</script>
 </html>
 <?php 
 } else {
