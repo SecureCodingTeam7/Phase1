@@ -61,10 +61,11 @@ if ( !isset($_SESSION['user_email']) || !isset($_SESSION['user_level']) || !isse
 				$transactions = $user->getTransactions( $account );
 				$odd = true;
 				$count = 0;
-				echo "<br />Account #".$account;
+				
 				
 				?>
 				<table class="pure-table">
+				<caption style="caption-side:top"><?php echo "<br />Account #".$account;?></caption>
 					<thead>
 						<tr>
 							<th>#</th>
