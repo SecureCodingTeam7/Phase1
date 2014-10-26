@@ -81,6 +81,26 @@ if( !(isset( $_POST['checkLogin'] ) ) ) { ?>
 	echo "<br />[DEBUG]Email: ".  $_POST['email'];
 	echo "<br />[DEBUG]Password: " .  $_POST['password'];
 	
+
+	if( $user->checkCredentials( $_POST ) ) {
+		/* Set Session */
+		session_start();
+		$_SESSION['user_email'] = $user->email;
+		$_SESSION['user_level'] = 1;
+		$_SESSION['user_login'] = 1;
+		
+		echo "<br />Successful Login. <a href='account/index.php'>Click here</a> to continue.";
+		echo "<br />[DEBUG] Session Data: user_email: " . $_SESSION['user_email'] .
+													  ", user_level: " . $_SESSION['user_level'] .
+													  ", user_login: " . $_SESSION['user_login'];	
+	} else {
+		/* Completeley destroy Session */
+		//$_SESSION = array();
+		//session_destroy();
+		
+		echo "<br />Incorrect Email/Password. Please <a href='login.php'>Try again</a>.";	
+	}
+
 	try { 
 	
 		if( $user->checkCredentials( $_POST ) ) {
@@ -112,5 +132,6 @@ if( !(isset( $_POST['checkLogin'] ) ) ) { ?>
 	} catch(IsActiveException $e) {
 		echo "<br />Your account was not approved yet, please wait until someone does!";
 	} 
+
 }
 ?>
