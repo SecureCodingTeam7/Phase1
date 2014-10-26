@@ -48,7 +48,7 @@ if ( !isset($_SESSION['user_email']) || !isset($_SESSION['user_level']) || !isse
 				
 				<div class="userpanel">
 					<?php echo $_SESSION['user_email'] ?>
-					<a href="logout.php">Logout</a><br />
+					<a href="../logout.php">Logout</a><br />
 					<?php 
 					if ($selectedAccount > 0) {
 					echo "Account: ".$selectedAccount;	

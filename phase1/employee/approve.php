@@ -41,7 +41,7 @@ if ( !isset($_SESSION['user_email']) || !isset($_SESSION['user_level']) || !isse
 <!doctype html>
 <html>
 <head>
-	<title>Phase1: Employee Panel</title>
+	<title>Phase1: Employee Approve</title>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<link href="../style/style.css" type="text/css" rel="stylesheet" />
 	<link href="../style/pure.css" type="text/css" rel="stylesheet" />
@@ -50,11 +50,14 @@ if ( !isset($_SESSION['user_email']) || !isset($_SESSION['user_level']) || !isse
 	<div class="content">
 		<div class="top_block header">
 			<div class="content">
-				
+				<div class="navigation">
+				Approve
+				<a href="history.php">History</a>
+				</div>
 				<div class="userpanel">
 					<?php echo $_SESSION['user_email'] ?>
-					<a href="logout.php">Logout</a><br />
-					Employee Panel
+					<a href="../logout.php">Logout</a><br />
+					Employee Approve
 				</div>
 			</div>
 		</div>

@@ -1,6 +1,20 @@
 <?php
 include_once(__DIR__."/include/db_connect.php"); 
 include_once(__DIR__."/class/c_user.php");
+session_start();
+if ( !isset($_SESSION['user_email']) || !isset($_SESSION['user_level']) || !isset($_SESSION['user_login']) ) {
+    // thats okay, the user can login
+} else if ( $_SESSION['user_email'] == "" || $_SESSION['user_level'] == "" || $_SESSION['user_login'] == "") {
+	// thats okay, the user can login
+} else {
+	// user already logged in
+	if($_SESSION['user_level']) {
+		header("Location: employee/approve.php");
+	} else {
+		header("Location: account/index.php");
+	}
+	die();
+}
 
 if( !(isset( $_POST['checkLogin'] ) ) ) { ?>
 <!doctype html>
@@ -76,6 +90,13 @@ if( !(isset( $_POST['checkLogin'] ) ) ) { ?>
 			$_SESSION['user_email'] = $user->email;
 			$_SESSION['user_level'] = $user->isEmployee;
 			$_SESSION['user_login'] = 1;
+			
+			if($user->isEmployee) {
+				header("Location: employee/approve.php");
+			} else {
+				header("Location: account/index.php");
+			}
+			die();
 			
 			echo "<br />Successful Login. <a href='account/index.php'>Click here</a> to continue.";
 			echo "<br />[DEBUG] Session Data: user_email: " . $_SESSION['user_email'] .
