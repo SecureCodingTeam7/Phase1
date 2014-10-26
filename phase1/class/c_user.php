@@ -12,30 +12,6 @@ class User {
 	public $isEmployee = null;
 	public $isActive = null;
 	
-	
-	public function checkPassword($passwd,$confirm_passwd){
-		
-		
-		$uppercase = preg_match('@[A-Z]@', $passwd);
-		$lowercase = preg_match('@[a-z]@', $passwd);
-		$number    = preg_match('@[0-9]@', $passwd);
-
-		
-		//TODO display rules for password
-		 if(!$uppercase || !$lowercase || !$number || strlen($passwd) < 8) {
-		//	echo " password not secure ";
-			return false;
-		}
-		#compare passwords
-		else if($passwd!=$confirm_passwd){
-		//	echo "You entered different passwords";
-			return false;
-		}
-		
-		return true;
-	}
-	
-	
 	public function getAccountNumberID( $accountNumber ) {
 		try {
 			$connection = new PDO( DB_NAME, DB_USER, DB_PASS );
@@ -148,19 +124,19 @@ class User {
 				
 				$codes = "";
 				for($i=0; $i<100;$i++){
-					$codes.= $i.": ".$tans[$i]. "\n";
+					$codes.= 'TAN #'.$i.": ".$tans[$i]. "\\";
 				}
 				
 
-				$message= "Dear User ".$this->email.". Here are your transcation codes, \n".$codes;
+				$message= "Dear User ".$this->email.".\\Your registration at mybank was successful, now you have to wait until an employee approves your request.\\Here are your transcation codes: \\".$codes;
 				
 				try{
-				$this->sendMail($this->email,$message);
-			}
-			catch (SendEmailException $e){
-				echo "<br/>".$e->errorMessage();	
-				return false;
-			}
+					$this->sendMail($this->email, $message);
+				}
+				catch (SendEmailException $e){
+					echo "<br/>".$e->errorMessage();	
+					return false;
+				}
 					
 				return true;
 				
@@ -174,6 +150,18 @@ class User {
 		}
 	}
 	
+	public function sendMail($email, $message) {
+		
+					echo "<br/> Sending mail";	
+		$header = 'From: info@mybank.com' . "\r\n";
+		$message = wordwrap($message, 70);
+		
+		$result = mail($email, 'mybank registration', $message, $header);
+		
+		if($result == 0) {
+			throw new SendMailExcceptio('mail() returned 0');
+		}
+	}
 	
 	public function commitTransaction( $source, $destination, $amount, $code ) {
 		$is_approved = true;
@@ -350,10 +338,6 @@ class User {
 			$this->isEmployee = true;
 		} else {
 			$this->isEmployee = false;
-		}
-		
-		if (!$this->checkPassword($this->password,$confirm_password)){
-		 return false;
 		}
 		
 		try{
