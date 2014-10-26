@@ -44,42 +44,43 @@
             
             if(isset($_POST['uploadFile'])){
                 
-                $name       = "transactionFile";
-                $temp_name  = $_FILES['myfile']['tmp_name'];
-                if(isset($name)){
-                    if(!empty($name)){
-                        $location = '../uploads/';
-                        if(move_uploaded_file($temp_name, $location.$name)){
-                            $uploadMessage = 'uploaded';
-                            
-                            $command = "./transfer_parser ".$user->id." ".$selectedAccount." ".$user->getNextTan($selectedAccount)." ".$location.$name." 2>&1";
+                //~ $name       = "transactionFile";
+                //~ $temp_name  = $_FILES['myfile']['tmp_name'];
+                
+               $uploadStatus = $_FILES['myfile']['error'];
+
+				switch($uploadStatus){
+					case UPLOAD_ERR_OK:
+                
+                            $command = "./transfer_parser ".$user->id." ".$selectedAccount." ".$user->getNextTan($selectedAccount)." ".$_FILES['myfile']['tmp_name']." 2>&1";
                             $result="";
                             exec($command,$result,$return);
-                            var_dump($result);
-                            echo " return value is: $return)";
+
                             if($return == 0 ){
                                 $uploadMessage=" Transaction commited";
                                 $user->updateNextTan( $selectedAccount);
                                 
-                                if(!unlink($location.$name)){
-                                    echo ("can't delete file");
-                                }
-                                
-                                
                             }
+      
                             else {
 								
                                 $uploadMessage = "Error: ".$result[0];
                             }
+                            break;
                             
+                     case UPLOAD_ERR_INI_SIZE: 
+								$uploadMessage = " Error: uploaded file is too big";
+								break;
+                     default:
+							    $uploadMessage = " Error: please upload your file again"; 
+							    break;
                         }
-                    }
-                }  else {
-                    $uploadMessage = " Error while uploading File! Please try again";
-                }
+                    
+               
             }
         }
-    }
+	}
+    
     ?>
 
 
