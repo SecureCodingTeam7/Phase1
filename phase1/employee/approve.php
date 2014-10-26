@@ -52,7 +52,7 @@ if ( !isset($_SESSION['user_email']) || !isset($_SESSION['user_level']) || !isse
 			<div class="content">
 				<div class="navigation">
 				Approve
-				<a href="history.php">History</a>
+				<a href="users.php">Users</a>
 				</div>
 				<div class="userpanel">
 					<?php echo $_SESSION['user_email'] ?>

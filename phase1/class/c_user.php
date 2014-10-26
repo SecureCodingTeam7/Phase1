@@ -464,6 +464,25 @@ class User {
 		}
 	}
 	
+	public function getAccountsForId ($id) {
+		$result = array ();
+		try{
+			$connection = new PDO( DB_NAME, DB_USER, DB_PASS );
+			$sql = "SELECT * FROM accounts WHERE user_id = :id";
+		
+			$stmt = $connection->prepare( $sql );
+			$stmt->bindValue( "id", $id, PDO::PARAM_STR );
+			$stmt->execute();
+		
+			$result = $stmt->fetchAll(PDO::FETCH_COLUMN, 2);
+			// var_dump($result);
+			$connection = null;
+			return $result;
+		} catch ( PDOException $e ) {
+			echo "<br />Connect Error: ". $e->getMessage();
+			return array();
+		}
+	}
 	
 	public function getUserDataFromEmail( $email ) {
 		$result = array ();
@@ -606,6 +625,27 @@ class User {
 			}
 			
 			$connection = null;
+		} catch ( PDOException $e ) {
+			echo "<br />Connect Error: ". $e->getMessage();
+			return array();
+		}
+	}
+	
+	public function getAllUsers() {
+		if(!$this->isEmployee) return array();
+		
+		$result = array ();
+		try{
+			$connection = new PDO( DB_NAME, DB_USER, DB_PASS );
+			$sql = "SELECT id, email,  BIN(`is_active` + 0) AS `is_active` FROM users WHERE is_employee = 0";
+		
+			$stmt = $connection->prepare( $sql );
+			$stmt->execute();
+		
+			$result = $stmt->fetchAll();
+			// var_dump($result);
+			$connection = null;
+			return $result;
 		} catch ( PDOException $e ) {
 			echo "<br />Connect Error: ". $e->getMessage();
 			return array();
