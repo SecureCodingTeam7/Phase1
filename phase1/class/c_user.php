@@ -40,7 +40,7 @@ class User {
 			$connection = new PDO( DB_NAME, DB_USER, DB_PASS );
 			$connection->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
 				
-			$sql = "SELECT * FROM transactions WHERE source = :account_number OR destination = :account_number";
+			$sql = "SELECT * FROM transactions WHERE source = :account_number OR destination = :account_number ORDER BY date_time";
 			$stmt = $connection->prepare ( $sql );
 			$stmt->bindValue( "account_number", $accountNumber, PDO::PARAM_STR );
 			$stmt->execute();

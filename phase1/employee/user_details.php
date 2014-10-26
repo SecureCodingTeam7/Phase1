@@ -72,6 +72,7 @@ if ( !isset($_SESSION['user_email']) || !isset($_SESSION['user_level']) || !isse
 							<th>Destination</th>
 							<th>Amount (Eur)</th>
 							<th>Approved</th>
+							<th>Time</th>
 						</tr>
 					</thead>
 				
@@ -95,6 +96,7 @@ if ( !isset($_SESSION['user_email']) || !isset($_SESSION['user_level']) || !isse
 						  
 							<td><p class=<?php if($transaction['destination'] == $account) echo "\"income\">"; else echo "\"expense\">"; echo $transaction['amount']."</p>"; ?></td>
 							<td><?php if ($transaction['is_approved'] > 0) echo "yes"; else echo "no"; ?></td>
+							<td><?php echo $transaction['date_time']; ?></td>
 						</tr>
 				<?php
 				}
