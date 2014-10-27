@@ -18,7 +18,12 @@ if ( !isset($_SESSION['user_email']) || !isset($_SESSION['user_level']) || !isse
 	
 	/* Session Data Invalid -> Redirect to Login */
 	//header($loginRedirectHeader);
-} else {
+}  else if($_SESSION['user_level']){
+		header("Location: ../login.php");
+		die();
+	}
+
+else {
 	/* Session Valid */
 	$user = new User();
 	$user->getUserDataFromEmail( $_SESSION['user_email'] );

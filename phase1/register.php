@@ -61,14 +61,6 @@ if( !(isset( $_POST['checkRegister'] ) ) ) { ?>
 		    </fieldset>
 			</form>
 
-		<?php 
-	        if (!defined('PDO::ATTR_DRIVER_NAME')) {
-	        	echo '[DEBUG] PDO unavailable';
-	        }
-	        elseif (defined('PDO::ATTR_DRIVER_NAME')) {
-	        	echo '[DEBUG] PDO available';
-	        }
-	    ?>
 		</div>
 		</div>
 	</div>
@@ -90,13 +82,13 @@ if( !(isset( $_POST['checkRegister'] ) ) ) { ?>
 		var uppercase = pw.search("[a-z]")
 		var number = pw.search("[0-9]")
 		
-		if(lowercase == -1 || uppercase == -1 || number == -1) {
-			pw_info.textContent = "Password must have at least one upper case, one lower case letter and one number"
+		if(pw.length <= 8 || lowercase == -1 || uppercase == -1 || number == -1) {
+			pw_info.textContent = "Password must have at least eight characters, one upper case, one lower case letter and one number"
 			submit_button.disabled = true
 		} else {
 			pw_info.textContent = ""
-			if(confirm_pw.value != "") {
-				submit_button.disabled = false
+			if(confirm_pw_field.value.length > 0) {
+				check_confirm_pw()
 			}
 		}
 	}
@@ -109,20 +101,21 @@ if( !(isset( $_POST['checkRegister'] ) ) ) { ?>
 			confirm_pw_info.textContent = ""
 			submit_button.disabled = false
 		}
+		check_pw()
 	}
 </script>
 </html>
 <?php 
 } else {
-	echo "checkRegister Post";
+	//~ echo "checkRegister Post";
 
 	$user = new User();
-	echo "<br />[DEBUG] Email: ". $_POST['email'];
-	echo "<br />[DEBUG] Password: " . $_POST['password'];
-	echo "<br />[DEBUG] Status: " . $_POST['status'];
+	//~ echo "<br />[DEBUG] Email: ". $_POST['email'];
+	//~ echo "<br />[DEBUG] Password: " . $_POST['password'];
+	//~ echo "<br />[DEBUG] Status: " . $_POST['status'];
 		
 	if( $user->register( $_POST ) ) {
-		echo "<br />Registration Successful. Go to <a href='login.php'>Sign in</a>.";
+		echo "<br />Registration for ". $_POST['email']." successful. Go to <a href='login.php'>Sign in</a>.";
 	} else {
 		echo "<br />Unable to register at this time. Please <a href='register.php'>try again</a>.";
 	}

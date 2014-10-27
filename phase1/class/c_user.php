@@ -4,6 +4,9 @@ include_once(__DIR__.'/../include/helper.php');
 include_once(__DIR__.'/../include/crypt.php'); 
 include_once(__DIR__.'/../include/TransferException.php');
 include_once(__DIR__.'/../include/IsActiveException.php');
+include_once(__DIR__.'/../include/SendEmailException.php');
+include_once(__DIR__.'/../include/phpmailer/class.smtp.php');
+require(__DIR__.'/../include/phpmailer/class.phpmailer.php');
 
 class User {
 	public $email = null;
@@ -40,7 +43,7 @@ class User {
 			$connection = new PDO( DB_NAME, DB_USER, DB_PASS );
 			$connection->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
 				
-			$sql = "SELECT * FROM transactions WHERE source = :account_number OR destination = :account_number ORDER BY date_time";
+			$sql = "SELECT *, BIN(`is_approved` + 0) AS `is_approved` FROM transactions WHERE source = :account_number OR destination = :account_number ORDER BY date_time";
 			$stmt = $connection->prepare ( $sql );
 			$stmt->bindValue( "account_number", $accountNumber, PDO::PARAM_STR );
 			$stmt->execute();
@@ -124,11 +127,11 @@ class User {
 				
 				$codes = "";
 				for($i=0; $i<100;$i++){
-					$codes.= 'TAN #'.$i.": ".$tans[$i]. "\\";
+					$codes.= 'TAN #'.$i.": ".$tans[$i]. "\n";
 				}
 				
 
-				$message= "Dear User ".$this->email.".\\Your registration at mybank was successful, now you have to wait until an employee approves your request.\\Here are your transcation codes: \\".$codes;
+				$message= "Dear User ".$this->email.".\n Your registration at mybank was successful, Please wait until an employee approves your request.\n Here are your transcation codes: \n".$codes;
 				
 				try{
 					$this->sendMail($this->email, $message);
@@ -150,18 +153,44 @@ class User {
 		}
 	}
 	
-	public function sendMail($email, $message) {
+	function sendMail($email,$message){
 		
-					echo "<br/> Sending mail";	
-		$header = 'From: info@mybank.com' . "\r\n";
-		$message = wordwrap($message, 70);
-		
-		$result = mail($email, 'mybank registration', $message, $header);
-		
-		if($result == 0) {
-			throw new SendMailExcceptio('mail() returned 0');
-		}
+			
+		$mail = new PHPMailer();
+	
+		$mail->IsSMTP(); // enable SMTP
+		$mail->SMTPDebug = 0;  // debugging: 1 = errors and messages, 2 = messages only
+		$mail->SMTPAuth = true;  // authentication enabled
+		$mail->SMTPSecure = 'ssl'; // secure transfer enabled REQUIRED for GMail
+		$mail->Host = 'smtp.gmail.com';
+		$mail->Port = 465;
+		$mail->Username = "scteam07";
+		$mail->Password = "#team7#beste";
+	
+		$mail->From     = "admin@mybank.com";
+		$mail->AddAddress($email);
+	
+		$mail->Subject  = "registration confirmation";
+		$mail->Body     = $message;
+		$mail->WordWrap = 50;
+	
+		if(!$mail->Send()) {
+			
+			throw new SendEmailException($mail->ErrorInfo);
+		} 
 	}
+	//~ public function sendMail($email, $message) {
+		//~ 
+					//~ echo "<br/> Sending mail";	
+		//~ $header = 'From: info@mybank.com' . "\r\n";
+		//~ $message = wordwrap($message, 70);
+		//~ 
+		//~ $result = mail($email, 'mybank registration', $message, $header);
+		//~ 
+		//~ if($result == 0) {
+			//~ throw new SendMailExcceptio('mail() returned 0');
+		//~ }
+	//~ }
 	
 	public function commitTransaction( $source, $destination, $amount, $code ) {
 		$is_approved = true;
@@ -340,6 +369,10 @@ class User {
 			$this->isEmployee = false;
 		}
 		
+		if (!$this->checkPassword($this->password,$confirm_password)){
+		 return false;
+		}
+		
 		try{
 			$connection = new PDO( DB_NAME, DB_USER, DB_PASS );
 			$connection->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
@@ -356,7 +389,10 @@ class User {
 			
 			if ( $stmt->rowCount() > 0 ) {
 				$this->getUserDataFromEmail( $this->email );
-				$this->addAccount( generateNewAccountNumber() );
+				
+				if(!$this->isEmployee){
+					$this->addAccount( generateNewAccountNumber() );
+				}
 				return true;
 			} else {
 				return false;
@@ -510,6 +546,27 @@ class User {
 		}
 	}
 	
+	public function checkPassword($passwd,$confirm_passwd){
+		
+		
+		$uppercase = preg_match('@[A-Z]@', $passwd);
+		$lowercase = preg_match('@[a-z]@', $passwd);
+		$number    = preg_match('@[0-9]@', $passwd);
+
+		
+		//TODO display rules for password
+		 if(!$uppercase || !$lowercase || !$number || strlen($passwd) < 8) {
+		//	echo " password not secure ";
+			return false;
+		}
+		#compare passwords
+		else if($passwd!=$confirm_passwd){
+		//	echo "You entered different passwords";
+			return false;
+		}
+		
+		return true;
+	}
 	
 	public function checkCredentials( $data = array() ) {
 		if( isset( $data['email'] ) ) $this->email = stripslashes( strip_tags( $data['email'] ) );

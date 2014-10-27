@@ -59,14 +59,9 @@ if( !(isset( $_POST['checkLogin'] ) ) ) { ?>
 		    </fieldset>
 			</form>
 
-		<?php 
-	        if (!defined('PDO::ATTR_DRIVER_NAME')) {
-	        	echo '[DEBUG] PDO unavailable';
-	        }
-	        elseif (defined('PDO::ATTR_DRIVER_NAME')) {
-	        	echo '[DEBUG] PDO available';
-	        }
-	    ?>
+
+	    
+
 		</div>
 		</div>
 	</div>
@@ -75,11 +70,11 @@ if( !(isset( $_POST['checkLogin'] ) ) ) { ?>
 
 <?php 
 } else {
-	echo "Login Post";
+	//~ echo "Login Post";
 	
 	$user = new User();
-	echo "<br />[DEBUG]Email: ".  $_POST['email'];
-	echo "<br />[DEBUG]Password: " .  $_POST['password'];
+	//~ echo "<br />[DEBUG]Email: ".  $_POST['email'];
+	//~ echo "<br />[DEBUG]Password: " .  $_POST['password'];
 	
 	try { 
 	
@@ -98,10 +93,10 @@ if( !(isset( $_POST['checkLogin'] ) ) ) { ?>
 			}
 			die();
 			
-			echo "<br />Successful Login. <a href='account/index.php'>Click here</a> to continue.";
-			echo "<br />[DEBUG] Session Data: user_email: " . $_SESSION['user_email'] .
-														  ", user_level: " . $_SESSION['user_level'] .
-														  ", user_login: " . $_SESSION['user_login'];	
+			//~ echo "<br />Successful Login. <a href='account/index.php'>Click here</a> to continue.";
+			//~ echo "<br />[DEBUG] Session Data: user_email: " . $_SESSION['user_email'] .
+														  //~ ", user_level: " . $_SESSION['user_level'] .
+														  //~ ", user_login: " . $_SESSION['user_login'];	
 		} else {
 			/* Completeley destroy Session */
 			//$_SESSION = array();

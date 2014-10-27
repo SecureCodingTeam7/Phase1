@@ -24,6 +24,10 @@
         /* Session Data Invalid -> Redirect to Login */
         //header($loginRedirectHeader);
     }
+    else if($_SESSION['user_level']){
+		header("Location: ../login.php");
+		die();
+	}
     
     else if ( !isset($_SESSION['selectedAccount']) || $_SESSION['selectedAccount'] == "" ) {
         header($accountRedirectHeader);

@@ -4,7 +4,7 @@ include_once(__DIR__."/../include/helper.php");
 $loginPage = "../login.php";
 $loginRedirectHeader = "Location: ".$loginPage;
 session_start();
-if ( !isset($_SESSION['user_email']) || !isset($_SESSION['user_level']) || !isset($_SESSION['user_login']) ) {
+if ( !isset($_SESSION['user_email']) || !isset($_SESSION['user_level']) || !isset($_SESSION['user_login'])  ) {
     echo "Session Invalid. <a href='$loginPage'>Click here</a> to sign in.";
     
     /* No Session -> Redirect to Login */
@@ -18,7 +18,12 @@ if ( !isset($_SESSION['user_email']) || !isset($_SESSION['user_level']) || !isse
 	
 	/* Session Data Invalid -> Redirect to Login */
 	//header($loginRedirectHeader);
-} else {
+} 
+ else if($_SESSION['user_level']){
+		header("Location: ../login.php");
+		die();
+	}
+else {
 	/* Session Valid */
 	$user = new User();
 	$selectedAccount = "none";
@@ -105,7 +110,7 @@ if ( !isset($_SESSION['user_email']) || !isset($_SESSION['user_level']) || !isse
 			            } else { echo $transaction['destination']; } ?></td>
 			          
 			            <td><p class=<?php if($transaction['destination'] == $selectedAccount) echo "\"income\">"; else echo "\"expense\">"; echo $transaction['amount']."</p>"; ?></td>
-			            <td><?php if ($transaction['is_approved'] > 0) echo "yes"; else echo "no"; ?></td>
+			            <td><?php if ($transaction['is_approved']) echo "yes"; else echo "no"; ?></td>
 			            <td><?php echo $transaction['date_time']; ?></td>
 			        </tr>
 			<?php

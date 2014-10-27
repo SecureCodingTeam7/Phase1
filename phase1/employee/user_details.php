@@ -19,7 +19,8 @@ if ( !isset($_SESSION['user_email']) || !isset($_SESSION['user_level']) || !isse
 	/* Session Data Invalid -> Redirect to Login */
 	//header($loginRedirectHeader);
 } else if(!$_SESSION['user_level']) {
-	echo "Access denied!";
+	header("Location: ../login.php");
+	die();
 } else if(!isset($_GET['email']) || !isset($_GET['id'])) {
 	echo "Invalid get params";
 } else {
