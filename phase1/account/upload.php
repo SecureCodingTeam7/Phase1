@@ -123,10 +123,16 @@
     ?>
 </div>
 </div>
-</div>
 
 
 
+<div class="main">
+	<div id="description">
+		Example file:<br /><br />
+		destination:2510053093<br />
+		code:299347049962292<br />
+		amount:123<br />
+	</div>
 <form method="post" action="" class="pure-form pure-form-aligned" enctype='multipart/form-data'>
 
 <fieldset>
@@ -146,6 +152,8 @@
 </form>
 </fieldset>	
 
+</div>
+</div>
 </body>
 
 </html>

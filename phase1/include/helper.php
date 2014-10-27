@@ -52,7 +52,7 @@ function checkAccountExists( $accountNumber ) {
 			return false;
 		}
 	} catch (PDOException $e) {
-		echo "<br />Connect Error: ". $e->getMessage();
+		//echo "<br />Connect Error: ". $e->getMessage();
 	}
 }
 
@@ -77,7 +77,7 @@ function checkUserExists( $email ) {
 			return false;
 		}
 	} catch (PDOException $e) {
-		echo "<br />Connect Error: ". $e->getMessage();
+		//echo "<br />Connect Error: ". $e->getMessage();
 	}
 }
 

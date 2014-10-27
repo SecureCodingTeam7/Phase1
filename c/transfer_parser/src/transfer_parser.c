@@ -419,7 +419,7 @@ int main(int argc, char **argv) {
 	if(mysql_real_connect(db,
 			"localhost",
 			"root",
-			"samurai",
+			"#team7#beste",
 			"mybank",
 			0,
 			NULL,

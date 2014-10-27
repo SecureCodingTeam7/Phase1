@@ -6,6 +6,6 @@ try
 {
 	$connection = new PDO(DB_NAME, DB_USER, DB_PASS);
 	} catch (PDOException $e) {
-		echo "<br />Connect Error: ". $e->getMessage();
+		//echo "<br />Connect Error: ". $e->getMessage();
 	}
 ?>
